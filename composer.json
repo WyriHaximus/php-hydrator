@@ -1,0 +1,102 @@
+{
+  "name": "wyrihaximus/hydrator",
+  "description": "Middleware infused hydrator",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Cees-Jan Kiewiet",
+      "email": "ceesjank@gmail.com",
+      "homepage": "https://www.wyrihaximus.net/"
+    }
+  ],
+  "require": {
+    "php": "^7.3",
+    "ocramius/generated-hydrator": "^3.0"
+  },
+  "require-dev": {
+    "wyrihaximus/async-test-utilities": "^1.0"
+  },
+  "config": {
+    "platform": {
+      "php": "7.3"
+    },
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "WyriHaximus\\Hydrator\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WyriHaximus\\Tests\\Hydrator\\": "tests/"
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "composer normalize"
+    ],
+    "post-update-cmd": [
+      "composer normalize"
+    ],
+    "ci-coverage": [
+      "if [ -f ./build/logs/clover.xml ]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./build/logs/clover.xml; fi"
+    ],
+    "cs": [
+      "php-cs-fixer fix --config=.php_cs --ansi --dry-run --diff --verbose --allow-risky=yes --show-progress=estimating"
+    ],
+    "cs-fix": [
+      "php-cs-fixer fix --config=.php_cs --ansi --verbose --allow-risky=yes --show-progress=estimating"
+    ],
+    "infection": [
+      "infection --ansi --min-msi=100 --min-covered-msi=100 --threads=4 --log-verbosity=all"
+    ],
+    "lint-php": [
+      "parallel-lint --exclude vendor ."
+    ],
+    "psalm": [
+      "psalm --threads=32"
+    ],
+    "qa-all": [
+      "composer validate --ansi",
+      "composer normalize --ansi",
+      "@lint-php",
+      "@cs",
+      "@stan",
+      "@psalm",
+      "@unit",
+      "@infection"
+    ],
+    "qa-all-extended": [
+      "composer validate --ansi",
+      "composer normalize --ansi",
+      "@lint-php",
+      "@cs",
+      "@stan",
+      "@psalm",
+      "@unit-coverage",
+      "@infection"
+    ],
+    "qa-ci": [
+      "@unit"
+    ],
+    "qa-ci-extended": [
+      "@qa-all-extended"
+    ],
+    "qa-ci-windows": [
+      "@qa-windows"
+    ],
+    "qa-contrib": [
+      "@qa-all"
+    ],
+    "stan": [
+      "phpstan analyse src tests --level max --ansi -c phpstan.neon"
+    ],
+    "unit": [
+      "phpunit --colors=always -c phpunit.xml.dist"
+    ],
+    "unit-coverage": [
+      "phpunit --colors=always -c phpunit.xml.dist --coverage-text --coverage-html covHtml --coverage-clover ./build/logs/clover.xml"
+    ]
+  }
+}
