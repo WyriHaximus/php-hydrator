@@ -1,31 +1,45 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace WyriHaximus\Hydrator;
 
 use GeneratedHydrator\Configuration;
 
+use function array_key_exists;
+use function get_class;
+
 final class Hydrator
 {
     /** @var object[] */
-    private $hydrators = [];
+    private array $hydrators = [];
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function hydrate(string $class, array $data): object
     {
-        $hydrator = $this->getHydrator($class);
-
-        return $hydrator->hydrate($data, new $class());
+        /**
+         * @phpstan-ignore-next-line
+         * @psalm-suppress InvalidStringClass
+         */
+        return $this->getHydrator($class)->hydrate($data, new $class());
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function extract(object $object): array
     {
-        $hydrator = $this->getHydrator(\get_class($object));
-
-        return $hydrator->extract($object);
+        /**
+         * @phpstan-ignore-next-line
+         */
+        return $this->getHydrator(get_class($object))->extract($object);
     }
 
     private function getHydrator(string $class): object
     {
-        if (isset($this->hydrators[$class])) {
+        if (array_key_exists($class, $this->hydrators)) {
             return $this->hydrators[$class];
         }
 
@@ -33,7 +47,7 @@ final class Hydrator
          * @psalm-suppress MissingClosureReturnType
          * @psalm-suppress InvalidPropertyAssignmentValue
          */
-        return $this->hydrators[$class] = (function (string $class) {
+        return $this->hydrators[$class] = (static function (string $class): object {
             $hydratorClass = (new Configuration($class))->createFactory()->getHydratorClass();
 
             /** @psalm-suppress InvalidStringClass */

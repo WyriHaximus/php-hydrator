@@ -1,28 +1,27 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace WyriHaximus\Tests\Hydrator;
 
-use WyriHaximus\AsyncTestUtilities\AsyncTestCase;
 use WyriHaximus\Hydrator\Hydrator;
+use WyriHaximus\TestUtilities\TestCase;
 
-/**
- * @internal
- */
-final class HydratorTest extends AsyncTestCase
+use function assert;
+
+final class HydratorTest extends TestCase
 {
     /**
      * @test
      */
     public function basic(): void
     {
-        $data = [
-            'id' => 123,
-        ];
+        $data = ['id' => 123];
 
         $hydrator = new Hydrator();
 
-        /** @var Cotton $cotton */
         $cotton = $hydrator->hydrate(Cotton::class, $data);
+        assert($cotton instanceof Cotton);
 
         self::assertSame(123, $cotton->getId());
 
