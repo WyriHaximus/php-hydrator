@@ -48,6 +48,10 @@ final class Hydrator
          * @psalm-suppress InvalidPropertyAssignmentValue
          */
         return $this->hydrators[$class] = (static function (string $class): object {
+            /**
+             * @phpstan-ignore-next-line
+             * @psalm-suppress ArgumentTypeCoercion
+             */
             $hydratorClass = (new Configuration($class))->createFactory()->getHydratorClass();
 
             /** @psalm-suppress InvalidStringClass */
