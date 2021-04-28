@@ -1,7 +1,0 @@
-parameters:
-	ignoreErrors:
-		- '#Call to an undefined method object::hydrate().#'
-		- '#Call to an undefined method object::extract().#'
-
-includes:
-	- vendor/wyrihaximus/async-test-utilities/rules.neon
