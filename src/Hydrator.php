@@ -4,26 +4,32 @@ declare(strict_types=1);
 
 namespace WyriHaximus\Hydrator;
 
-use GeneratedHydrator\Configuration;
-
-use function array_key_exists;
-use function get_class;
+use function count;
 
 final class Hydrator
 {
-    /** @var object[] */
-    private array $hydrators = [];
+    /** @var array<MiddlewareInterface> */
+    private array $middleware = [];
+
+    private int $middlewareCount;
+
+    public function __construct(MiddlewareInterface ...$middleware)
+    {
+        $this->middleware      = $middleware;
+        $this->middlewareCount = count($this->middleware);
+    }
 
     /**
      * @param array<string, mixed> $data
      */
     public function hydrate(string $class, array $data): object
     {
-        /**
-         * @phpstan-ignore-next-line
-         * @psalm-suppress InvalidStringClass
-         */
-        return $this->getHydrator($class)->hydrate($data, new $class());
+        $stack = new HydratorMiddlewareCaller();
+        for ($i = $this->middlewareCount - 1; $i >= 0; $i--) {
+            $stack = new MiddlewareCaller($this->middleware[$i], $stack);
+        }
+
+        return $stack->hydrate($class, $data);
     }
 
     /**
@@ -31,31 +37,11 @@ final class Hydrator
      */
     public function extract(object $object): array
     {
-        /**
-         * @phpstan-ignore-next-line
-         */
-        return $this->getHydrator(get_class($object))->extract($object);
-    }
-
-    private function getHydrator(string $class): object
-    {
-        if (array_key_exists($class, $this->hydrators)) {
-            return $this->hydrators[$class];
+        $stack = new HydratorMiddlewareCaller();
+        for ($i = 0; $i < $this->middlewareCount; $i++) {
+            $stack = new MiddlewareCaller($this->middleware[$i], $stack);
         }
 
-        /**
-         * @psalm-suppress MissingClosureReturnType
-         * @psalm-suppress InvalidPropertyAssignmentValue
-         */
-        return $this->hydrators[$class] = (static function (string $class): object {
-            /**
-             * @phpstan-ignore-next-line
-             * @psalm-suppress ArgumentTypeCoercion
-             */
-            $hydratorClass = (new Configuration($class))->createFactory()->getHydratorClass();
-
-            /** @psalm-suppress InvalidStringClass */
-            return new $hydratorClass();
-        })($class);
+        return $stack->extract($object);
     }
 }
