@@ -14,6 +14,13 @@ final class HydratorMiddlewareCaller implements MiddlewareCallerInterface
     /** @var object[] */
     private array $hydrators = [];
 
+    private Hydrator $hydrator;
+
+    public function __construct(Hydrator $hydrator)
+    {
+        $this->hydrator = $hydrator;
+    }
+
     /**
      * @param array<string, mixed> $data
      */
@@ -57,5 +64,10 @@ final class HydratorMiddlewareCaller implements MiddlewareCallerInterface
             /** @psalm-suppress InvalidStringClass */
             return new $hydratorClass();
         })($class);
+    }
+
+    public function hydrator(): Hydrator
+    {
+        return $this->hydrator;
     }
 }

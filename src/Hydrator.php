@@ -24,9 +24,9 @@ final class Hydrator
      */
     public function hydrate(string $class, array $data): object
     {
-        $stack = new HydratorMiddlewareCaller();
+        $stack = new HydratorMiddlewareCaller($this);
         for ($i = $this->middlewareCount - 1; $i >= 0; $i--) {
-            $stack = new MiddlewareCaller($this->middleware[$i], $stack);
+            $stack = new MiddlewareCaller($this, $this->middleware[$i], $stack);
         }
 
         return $stack->hydrate($class, $data);
@@ -37,9 +37,9 @@ final class Hydrator
      */
     public function extract(object $object): array
     {
-        $stack = new HydratorMiddlewareCaller();
+        $stack = new HydratorMiddlewareCaller($this);
         for ($i = 0; $i < $this->middlewareCount; $i++) {
-            $stack = new MiddlewareCaller($this->middleware[$i], $stack);
+            $stack = new MiddlewareCaller($this, $this->middleware[$i], $stack);
         }
 
         return $stack->extract($object);

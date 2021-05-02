@@ -15,4 +15,6 @@ interface MiddlewareCallerInterface
      * @return array<string, mixed>
      */
     public function extract(object $object): array;
+
+    public function hydrator(): Hydrator;
 }
