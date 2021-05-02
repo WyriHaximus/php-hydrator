@@ -8,7 +8,7 @@ final class Cotton
 {
     private int $id;
 
-    public function getId(): int
+    public function id(): int
     {
         return $this->id;
     }

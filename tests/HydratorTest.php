@@ -7,6 +7,7 @@ namespace WyriHaximus\Tests\Hydrator;
 use SplQueue;
 use WyriHaximus\Hydrator\Hydrator;
 use WyriHaximus\Tests\Hydrator\Middleware\CallRecordingMiddleware;
+use WyriHaximus\Tests\Hydrator\Middleware\NestedEntityMiddleware;
 use WyriHaximus\TestUtilities\TestCase;
 
 use function assert;
@@ -26,7 +27,7 @@ final class HydratorTest extends TestCase
         $cotton = $hydrator->hydrate(Cotton::class, $data);
         assert($cotton instanceof Cotton);
 
-        self::assertSame(123, $cotton->getId());
+        self::assertSame(123, $cotton->id());
 
         $array = $hydrator->extract($cotton);
 
@@ -49,7 +50,7 @@ final class HydratorTest extends TestCase
         $cotton = $hydrator->hydrate(Cotton::class, $data);
         assert($cotton instanceof Cotton);
 
-        self::assertSame(123, $cotton->getId());
+        self::assertSame(123, $cotton->id());
         $array = $hydrator->extract($cotton);
         self::assertSame($data, $array);
 
@@ -66,5 +67,24 @@ final class HydratorTest extends TestCase
             [spl_object_hash($middlewareSecond), 'extract'],
             [spl_object_hash($middlewareFirst), 'extract'],
         ], $queueArray);
+    }
+
+    /**
+     * @test
+     */
+    public function nestedEntity(): void
+    {
+        $data = ['label' => 'stamp', 'cotton' => ['id' => 123]];
+
+        $queue    = new SplQueue();
+        $hydrator = new Hydrator(new NestedEntityMiddleware());
+
+        $package = $hydrator->hydrate(Package::class, $data);
+        assert($package instanceof Package);
+
+        self::assertSame('stamp', $package->label());
+        self::assertSame(123, $package->cotton()->id());
+        $array = $hydrator->extract($package);
+        self::assertSame($data, $array);
     }
 }

@@ -6,11 +6,13 @@ namespace WyriHaximus\Hydrator;
 
 final class MiddlewareCaller implements MiddlewareCallerInterface
 {
+    private Hydrator $hydrator;
     private MiddlewareInterface $middleware;
     private MiddlewareCallerInterface $middlewareCaller;
 
-    public function __construct(MiddlewareInterface $middleware, MiddlewareCallerInterface $middlewareCaller)
+    public function __construct(Hydrator $hydrator, MiddlewareInterface $middleware, MiddlewareCallerInterface $middlewareCaller)
     {
+        $this->hydrator         = $hydrator;
         $this->middleware       = $middleware;
         $this->middlewareCaller = $middlewareCaller;
     }
@@ -29,5 +31,10 @@ final class MiddlewareCaller implements MiddlewareCallerInterface
     public function extract(object $object): array
     {
         return $this->middleware->extract($object, $this->middlewareCaller);
+    }
+
+    public function hydrator(): Hydrator
+    {
+        return $this->hydrator;
     }
 }
