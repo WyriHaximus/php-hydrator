@@ -6,6 +6,7 @@ namespace WyriHaximus\Tests\Hydrator;
 
 use SplQueue;
 use WyriHaximus\Hydrator\Hydrator;
+use WyriHaximus\Hydrator\Middleware\NestedArrayEntityMiddleware;
 use WyriHaximus\Tests\Hydrator\Middleware\CallRecordingMiddleware;
 use WyriHaximus\Tests\Hydrator\Middleware\NestedEntityMiddleware;
 use WyriHaximus\TestUtilities\TestCase;
@@ -74,16 +75,20 @@ final class HydratorTest extends TestCase
      */
     public function nestedEntity(): void
     {
-        $data = ['label' => 'stamp', 'cotton' => ['id' => 123]];
+        $data = ['label' => 'stamp', 'cotton' => ['id' => 123], 'cottons' => [['id' => 123], ['id' => 123], ['id' => 123], ['id' => 123]]];
 
-        $queue    = new SplQueue();
-        $hydrator = new Hydrator(new NestedEntityMiddleware());
+        $hydrator = new Hydrator(new NestedEntityMiddleware(), new NestedArrayEntityMiddleware());
 
         $package = $hydrator->hydrate(Package::class, $data);
         assert($package instanceof Package);
 
         self::assertSame('stamp', $package->label());
         self::assertSame(123, $package->cotton()->id());
+        self::assertCount(4, $package->cottons());
+        foreach ($package->cottons() as $cotton) {
+            self::assertSame(123, $cotton->id());
+        }
+
         $array = $hydrator->extract($package);
         self::assertSame($data, $array);
     }
