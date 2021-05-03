@@ -21,7 +21,7 @@ use function get_class;
 use function is_string;
 use function ltrim;
 
-final class NestedArrayEntityMiddleware implements MiddlewareInterface
+final class NestedEntityMiddleware implements MiddlewareInterface
 {
     /**
      * @inheritDoc
@@ -40,34 +40,18 @@ final class NestedArrayEntityMiddleware implements MiddlewareInterface
             }
             $reflectionProperty = $reflectionClass->getProperty($key);
 
-            $docblock = $reflectionProperty->getDocComment();
-            if (! is_string($docblock)) {
+            $type = $reflectionProperty->getType();
+            if ($type === null) {
                 continue;
             }
 
-            $constExprParser = new ConstExprParser();
-            $tokens          = new TokenIterator((new Lexer())->tokenize($docblock));
-            $varTag          = (new PhpDocParser(new TypeParser($constExprParser), $constExprParser))->parse($tokens)->getVarTagValues();
-            if (count($varTag) === 0) {
-                continue;
-            }
-
-            $varTag = current($varTag);
-            if ((string) $varTag->type->type !== 'array') {
-                continue;
-            }
-
-            if (count($varTag->type->genericTypes) === 0) {
-                continue;
-            }
-
-            $cc = ltrim((string) current($varTag->type->genericTypes), '\\');
+            $cc = ltrim((string) $type, '\\');
 
             if (! class_exists($cc)) {
                 continue;
             }
 
-            $data[$key] = array_map(static fn (array $d): object => $next->hydrator()->hydrate($cc, $d), $data[$key]);
+            $data[$key] = $next->hydrator()->hydrate($cc, $data[$key]);
         }
 
         return $next->hydrate($class, $data);
@@ -92,34 +76,18 @@ final class NestedArrayEntityMiddleware implements MiddlewareInterface
             }
             $reflectionProperty = $reflectionClass->getProperty($key);
 
-            $docblock = $reflectionProperty->getDocComment();
-            if (! is_string($docblock)) {
+            $type = $reflectionProperty->getType();
+            if ($type === null) {
                 continue;
             }
 
-            $constExprParser = new ConstExprParser();
-            $tokens          = new TokenIterator((new Lexer())->tokenize($docblock));
-            $varTag          = (new PhpDocParser(new TypeParser($constExprParser), $constExprParser))->parse($tokens)->getVarTagValues();
-            if (count($varTag) === 0) {
-                continue;
-            }
-
-            $varTag = current($varTag);
-            if ((string) $varTag->type->type !== 'array') {
-                continue;
-            }
-
-            if (count($varTag->type->genericTypes) === 0) {
-                continue;
-            }
-
-            $cc = ltrim((string) current($varTag->type->genericTypes), '\\');
+            $cc = ltrim((string) $type, '\\');
 
             if (! class_exists($cc)) {
                 continue;
             }
 
-            $data[$key] = array_map(static fn (object $d): array => $next->hydrator()->extract($d), $data[$key]);
+            $data[$key] = $next->hydrator()->extract($data[$key]);
         }
 
         return $data;
