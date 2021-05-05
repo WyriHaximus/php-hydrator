@@ -4,25 +4,23 @@ declare(strict_types=1);
 
 namespace WyriHaximus\Hydrator\Middleware;
 
-use PHPStan\PhpDocParser\Lexer\Lexer;
-use PHPStan\PhpDocParser\Parser\ConstExprParser;
-use PHPStan\PhpDocParser\Parser\PhpDocParser;
-use PHPStan\PhpDocParser\Parser\TokenIterator;
-use PHPStan\PhpDocParser\Parser\TypeParser;
+use Doctrine\Common\Annotations\Reader;
 use ReflectionClass;
+use WyriHaximus\Hydrator\Attribute\Hydrate;
 use WyriHaximus\Hydrator\MiddlewareCallerInterface;
 use WyriHaximus\Hydrator\MiddlewareInterface;
 
-use function array_map;
-use function class_exists;
-use function count;
-use function current;
 use function get_class;
-use function is_string;
-use function ltrim;
 
 final class NestedEntityMiddleware implements MiddlewareInterface
 {
+    private Reader $annotationReader;
+
+    public function __construct(Reader $annotationReader)
+    {
+        $this->annotationReader = $annotationReader;
+    }
+
     /**
      * @inheritDoc
      */
@@ -31,27 +29,17 @@ final class NestedEntityMiddleware implements MiddlewareInterface
         $reflectionClass = new ReflectionClass($class);
 
         foreach ($data as $key => $value) {
-            if (! is_string($key)) {
+            if (! $reflectionClass->hasProperty($key)) {
                 continue;
             }
 
-            if (!$reflectionClass->hasProperty($key)) {
-                continue;
-            }
-            $reflectionProperty = $reflectionClass->getProperty($key);
+            $annotation = $this->annotationReader->getPropertyAnnotation($reflectionClass->getProperty($key), Hydrate::class);
 
-            $type = $reflectionProperty->getType();
-            if ($type === null) {
+            if (! ($annotation instanceof Hydrate)) {
                 continue;
             }
 
-            $cc = ltrim((string) $type, '\\');
-
-            if (! class_exists($cc)) {
-                continue;
-            }
-
-            $data[$key] = $next->hydrator()->hydrate($cc, $data[$key]);
+            $data[$key] = $next->hydrator()->hydrate($annotation->className(), $data[$key]);
         }
 
         return $next->hydrate($class, $data);
@@ -67,26 +55,19 @@ final class NestedEntityMiddleware implements MiddlewareInterface
         $reflectionClass = new ReflectionClass(get_class($object));
 
         foreach ($data as $key => $value) {
-            if (! is_string($key)) {
+            if (! $reflectionClass->hasProperty($key)) {
                 continue;
             }
 
-            if (!$reflectionClass->hasProperty($key)) {
-                continue;
-            }
-            $reflectionProperty = $reflectionClass->getProperty($key);
+            $annotation = $this->annotationReader->getPropertyAnnotation($reflectionClass->getProperty($key), Hydrate::class);
 
-            $type = $reflectionProperty->getType();
-            if ($type === null) {
+            if (! ($annotation instanceof Hydrate)) {
                 continue;
             }
 
-            $cc = ltrim((string) $type, '\\');
-
-            if (! class_exists($cc)) {
-                continue;
-            }
-
+            /**
+             * @psalm-suppress PossiblyInvalidArgument
+             */
             $data[$key] = $next->hydrator()->extract($data[$key]);
         }
 
