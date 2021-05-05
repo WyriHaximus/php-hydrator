@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace WyriHaximus\Tests\Hydrator;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use SplQueue;
 use WyriHaximus\Hydrator\Hydrator;
 use WyriHaximus\Hydrator\Middleware\NestedArrayEntityMiddleware;
+use WyriHaximus\Hydrator\Middleware\NestedEntityMiddleware;
 use WyriHaximus\Tests\Hydrator\Middleware\CallRecordingMiddleware;
-use WyriHaximus\Tests\Hydrator\Middleware\NestedEntityMiddleware;
 use WyriHaximus\TestUtilities\TestCase;
 
 use function assert;
@@ -77,7 +78,8 @@ final class HydratorTest extends TestCase
     {
         $data = ['label' => 'stamp', 'cotton' => ['id' => 123], 'cottons' => [['id' => 123], ['id' => 123], ['id' => 123], ['id' => 123]]];
 
-        $hydrator = new Hydrator(new NestedEntityMiddleware(), new NestedArrayEntityMiddleware());
+        $reader   = new AnnotationReader();
+        $hydrator = new Hydrator(new NestedEntityMiddleware($reader), new NestedArrayEntityMiddleware($reader));
 
         $package = $hydrator->hydrate(Package::class, $data);
         assert($package instanceof Package);

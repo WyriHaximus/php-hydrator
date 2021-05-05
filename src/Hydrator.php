@@ -20,6 +20,7 @@ final class Hydrator
     }
 
     /**
+     * @param class-string         $class
      * @param array<string, mixed> $data
      */
     public function hydrate(string $class, array $data): object
