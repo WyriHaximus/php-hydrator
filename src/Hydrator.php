@@ -6,7 +6,7 @@ namespace WyriHaximus\Hydrator;
 
 use function count;
 
-final class Hydrator
+final class Hydrator implements HydratorInterface
 {
     /** @var array<MiddlewareInterface> */
     private array $middleware = [];
@@ -20,8 +20,7 @@ final class Hydrator
     }
 
     /**
-     * @param class-string         $class
-     * @param array<string, mixed> $data
+     * @inheritDoc
      */
     public function hydrate(string $class, array $data): object
     {
@@ -34,7 +33,7 @@ final class Hydrator
     }
 
     /**
-     * @return array<string, mixed>
+     * @inheritDoc
      */
     public function extract(object $object): array
     {
