@@ -12,7 +12,6 @@ use WyriHaximus\Hydrator\Middleware\NestedEntityMiddleware;
 use WyriHaximus\Tests\Hydrator\Middleware\CallRecordingMiddleware;
 use WyriHaximus\TestUtilities\TestCase;
 
-use function assert;
 use function spl_object_hash;
 
 final class HydratorTest extends TestCase
@@ -27,7 +26,6 @@ final class HydratorTest extends TestCase
         $hydrator = new Hydrator();
 
         $cotton = $hydrator->hydrate(Cotton::class, $data);
-        assert($cotton instanceof Cotton);
 
         self::assertSame(123, $cotton->id());
 
@@ -50,7 +48,6 @@ final class HydratorTest extends TestCase
         $hydrator         = new Hydrator($middlewareFirst, $middlewareSecond, $middlewareThird);
 
         $cotton = $hydrator->hydrate(Cotton::class, $data);
-        assert($cotton instanceof Cotton);
 
         self::assertSame(123, $cotton->id());
         $array = $hydrator->extract($cotton);
@@ -82,7 +79,6 @@ final class HydratorTest extends TestCase
         $hydrator = new Hydrator(new NestedEntityMiddleware($reader), new NestedArrayEntityMiddleware($reader));
 
         $package = $hydrator->hydrate(Package::class, $data);
-        assert($package instanceof Package);
 
         self::assertSame('stamp', $package->label());
         self::assertSame(123, $package->cotton()->id());

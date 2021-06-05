@@ -14,15 +14,15 @@ final class HydratorMiddlewareCaller implements MiddlewareCallerInterface
     /** @var object[] */
     private array $hydrators = [];
 
-    private Hydrator $hydrator;
+    private HydratorInterface $hydrator;
 
-    public function __construct(Hydrator $hydrator)
+    public function __construct(HydratorInterface $hydrator)
     {
         $this->hydrator = $hydrator;
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @inheritDoc
      */
     public function hydrate(string $class, array $data): object
     {
@@ -34,7 +34,7 @@ final class HydratorMiddlewareCaller implements MiddlewareCallerInterface
     }
 
     /**
-     * @return array<string, mixed>
+     * @inheritDoc
      */
     public function extract(object $object): array
     {
@@ -66,7 +66,7 @@ final class HydratorMiddlewareCaller implements MiddlewareCallerInterface
         })($class);
     }
 
-    public function hydrator(): Hydrator
+    public function hydrator(): HydratorInterface
     {
         return $this->hydrator;
     }
