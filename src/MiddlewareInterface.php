@@ -7,8 +7,12 @@ namespace WyriHaximus\Hydrator;
 interface MiddlewareInterface
 {
     /**
-     * @param class-string         $class
+     * @param class-string<OM>     $class
      * @param array<string, mixed> $data
+     *
+     * @return OM
+     *
+     * @template OM of object
      */
     public function hydrate(string $class, array $data, MiddlewareCallerInterface $next): object;
 
