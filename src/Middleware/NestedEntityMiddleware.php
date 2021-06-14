@@ -11,6 +11,8 @@ use WyriHaximus\Hydrator\MiddlewareCallerInterface;
 use WyriHaximus\Hydrator\MiddlewareInterface;
 
 use function get_class;
+use function is_array;
+use function is_object;
 
 final class NestedEntityMiddleware implements MiddlewareInterface
 {
@@ -39,6 +41,10 @@ final class NestedEntityMiddleware implements MiddlewareInterface
                 continue;
             }
 
+            if (! is_array($data[$key])) {
+                continue;
+            }
+
             $data[$key] = $next->hydrator()->hydrate($annotation->className(), $data[$key]);
         }
 
@@ -62,6 +68,10 @@ final class NestedEntityMiddleware implements MiddlewareInterface
             $annotation = $this->annotationReader->getPropertyAnnotation($reflectionClass->getProperty($key), Hydrate::class);
 
             if (! ($annotation instanceof Hydrate)) {
+                continue;
+            }
+
+            if (! is_object($data[$key])) {
                 continue;
             }
 

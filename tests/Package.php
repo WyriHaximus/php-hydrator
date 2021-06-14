@@ -12,7 +12,7 @@ final class Package
     private string $label;
 
     /** @Hydrate(Cotton::class) */
-    private Cotton $cotton;
+    private ?Cotton $cotton = null;
 
     /**
      * @var array<Cotton>
@@ -25,7 +25,8 @@ final class Package
         return $this->label;
     }
 
-    public function cotton(): Cotton
+    /** @phpstan-ignore-next-line */
+    public function cotton(): ?Cotton
     {
         return $this->cotton;
     }
